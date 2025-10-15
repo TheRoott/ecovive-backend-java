@@ -1,0 +1,194 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,image/png,image/jpeg
+
+spring:
+  application:
+    name: ecovive-backend
+  
+  profiles:
+    active: dev
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecovive_db
+    username: ecovive_user
+    password: ecovive_pass123
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+  
+  security:
+    jwt:
+      secret: ecovive_jwt_secret_key_2024_very_secure_256_bits
+      expiration: 86400000 # 24 horas
+  
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=600s
+
+# AWS S3 Configuration
+aws:
+  s3:
+    bucket-name: ecovive-peru-files
+    region: us-east-1
+    access-key: ${AWS_ACCESS_KEY_ID:your-access-key}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:your-secret-key}
+    endpoint: ${AWS_S3_ENDPOINT:https://s3.amazonaws.com}
+
+# File Storage Configuration
+file:
+  storage:
+    type: s3 # s3 o local
+    local:
+      upload-dir: ./uploads
+      base-url: http://localhost:8080/api/files
+
+# Email Configuration
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: ${MAIL_USERNAME:ecovive.peru@gmail.com}
+  password: ${MAIL_PASSWORD:your-app-password}
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+
+# Logging Configuration
+logging:
+  level:
+    com.ecovive: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/ecovive-backend.log
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  show-actuator: true
+
+# Application Custom Properties
+app:
+  name: EcoVive Perú Backend
+  version: 1.0.0
+  description: Backend para aplicación de reportes ambientales
+  
+  # Rate Limiting
+  rate-limit:
+    requests-per-minute: 60
+    burst-capacity: 100
+  
+  # File Upload Limits
+  upload:
+    max-file-size: 10485760 # 10MB
+    allowed-extensions: jpg,jpeg,png,gif,webp
+    max-files-per-request: 5
+  
+  # User Limits
+  user:
+    max-reports-per-day: 50
+    max-photos-per-report: 10
+  
+  # Cache Configuration
+  cache:
+    user-profile-ttl: 3600 # 1 hora
+    reports-list-ttl: 300 # 5 minutos
+    stats-ttl: 1800 # 30 minutos
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecovive_dev
+    username: ecovive_dev
+    password: dev_pass123
+  
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+
+logging:
+  level:
+    com.ecovive: DEBUG
+    org.springframework.web: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+  
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    com.ecovive: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+
+app:
+  rate-limit:
+    requests-per-minute: 100
+    burst-capacity: 200

@@ -1,0 +1,28 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration: 86400000
+
+aws:
+  s3:
+    bucket-name: ecovive-peru-files
+    region: us-east-1
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}

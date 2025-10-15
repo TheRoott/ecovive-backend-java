@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "java -jar target/ecovive-backend-1.0.0.jar"
+healthcheckPath = "/actuator/health"
+
+[env]
+JAVA_VERSION = "17"
